@@ -79,7 +79,7 @@ public:
 	}
 
 	/* Ciphers an integer 
-			-Uses the "CipherXReflector" methods to handle cipher at various segments of progression through the rotor sequence */
+			-Uses the "CipherXReflector" methods to handle ciphering process at various segments of progression through the rotor sequence */
 	int Cipher(int cipher_target);
 
 	/* Handles ciphering from start of rotor sequence until the reflector is reached 

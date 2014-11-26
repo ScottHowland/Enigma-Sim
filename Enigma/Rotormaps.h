@@ -17,7 +17,6 @@ using std::array;
 		-Unlike regular rotors, a reflector creates two-way mappings between characters
 		-EX...
 			If 5 'F' maps to 23 'X', then 23 will map to 5 */
-#pragma region WideBMap
 int WideBMap(int alpha_int) {
 	switch (alpha_int) {
 
@@ -77,13 +76,11 @@ int WideBMap(int alpha_int) {
 		return 0;
 	}
 }
-#pragma endregion Mapping for a Wide B Reflector
 /* Determines mapping scheme for I-type rotors
 		-Standard rotors do not create two-way mappings between characters 
 		-EX...
 			If 5 maps to 23, then 23 will not map to 5 
 		-There are, however, circumstances where a value will map to itself */
-#pragma region IMap
 int IMap(int alpha_int) {
 	switch (alpha_int) {
 
@@ -143,9 +140,7 @@ int IMap(int alpha_int) {
 		return 0;
 	}
 }
-#pragma endregion Mapping for a I rotor
 /* Determines mapping scheme for II-type rotors */
-#pragma region IIMap
 int IIMap(int alpha_int) {
 	switch (alpha_int) {
 
@@ -205,9 +200,7 @@ int IIMap(int alpha_int) {
 		return 0;
 	}
 }
-#pragma endregion Mapping for a II rotor
 /* Determines mapping scheme for III-type rotors */
-#pragma region IIIMap
 int IIIMap(int alpha_int) {
 	switch (alpha_int) {
 
@@ -267,6 +260,4 @@ int IIIMap(int alpha_int) {
 		return 0;
 	}
 }
-#pragma endregion Mapping for a III rotor
-
 #endif

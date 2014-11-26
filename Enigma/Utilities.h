@@ -35,11 +35,21 @@ void CenterString(string text) {
 	cout << text << endl;
 }
 
+
 /* Prints one console line's worth of dashes */
 void DashLine(){
 	for (int k = 0; k < 80; ++k)
 		cout << "-";
 	cout << endl;
+}
+
+/* Displays the application's title */
+void Title() {
+	DashLine();
+	CenterString("Enigma Simulator\n");
+	CenterString("Created by Scott Howland, Whitworth University\n");
+	CenterString("Designed and Developed from 11/17/14 to 11/25/14\n");
+	DashLine();
 }
 
 /* Capitalizes all elements of a given string */
@@ -176,16 +186,7 @@ int SetRotorOffset(int slot_target) {
 		return return_offset;
 }
 
-/* Displays the application's title */
-void Title() {
-	DashLine();
-	CenterString("Enigma Simulator\n");
-	CenterString("Created by Scott Howland\n");
-	CenterString("Designed and Developed from 11/17/14 to 11/25/14\n");
-	DashLine();
-}
-
-/* Displays the application's construction menu */
+/* Displays the application's construction menus */
 Enigmachine Menu(const int map_size) {
 	string right_model, mid_model, left_model, reflector_model;
 	int right_offset, mid_offset, left_offset;
