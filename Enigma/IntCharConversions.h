@@ -1,12 +1,19 @@
-#ifndef _INTCHARCONVERSIONS_H
-#define _INTCHARCONVERSIONS_H
+/* Based on the value of a given character, CharToInt converts it to an equivalent integer value 
+   Similarly, IntToChar will convert a given integer value into its character counterpart */
+
+#ifndef ENIGMA_ENIGMA_INTCHARCONVERSIONS_H_
+#define ENIGMA_ENIGMA_INTCHARCONVERSIONS_H_
+
 #include <string>
 
 using std::string;
 
-#pragma region chartoint
-int chartoint(char conversiontarget) {
-	switch (conversiontarget) {
+/* Return integer value based on character to be converted 
+		-NOTE: Can only handle capital, alpha-type characters
+		-If an unexpected value is entered, a 0 will be returned */
+#pragma region CharToInt
+int CharToInt(const char conversion_target) {
+	switch (conversion_target) {
 	case 'A':
 		return 0;
 	case 'B':
@@ -67,9 +74,12 @@ int chartoint(char conversiontarget) {
 }
 #pragma endregion Converts a character to an integer equivalent
 
-#pragma region inttochar
-char inttochar(int conversiontarget) {
-	switch (conversiontarget) {
+/* Return character value based on integer to be converted
+		-NOTE: Only returns capital, alpha-type characters 
+		-If an unexpected value is entered, an 'A' will be returned */
+#pragma region IntToChar
+char IntToChar(int conversion_target) {
+	switch (conversion_target) {
 	case 0:
 		return 'A';
 	case 1:

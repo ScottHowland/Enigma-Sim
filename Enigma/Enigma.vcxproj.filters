@@ -15,22 +15,22 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="EnigmaMachine.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Utilities.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Rotor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="AppFlow.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Rotormaps.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="IntCharConversions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Execute.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Enigmachine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

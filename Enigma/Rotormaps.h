@@ -1,12 +1,25 @@
-#ifndef _ROTORMAPS_H
-#define _ROTORMAPS_H
+/* Each function determines the value each array index (case), maps to 
+		-Can be expanded to include mappings to and from non-alpha characters
+		-EX...
+			In the situation
+				case 3:
+					return 9;
+			The array's 3rd position ('D') will contain, or map to, a value of 9 ('J') */
+
+#ifndef ENIGMA_ENIGMA_ROTORMAPS_H_
+#define ENIGMA_ENIGMA_ROTORMAPS_H_
+
 #include <array>
 
 using std::array;
 
-#pragma region WideB_map
-int WideB_map(int alphaint) {
-	switch (alphaint) {
+/* Determines mapping scheme for a Wide B reflector type 
+		-Unlike regular rotors, a reflector creates two-way mappings between characters
+		-EX...
+			If 5 'F' maps to 23 'X', then 23 will map to 5 */
+#pragma region WideBMap
+int WideBMap(int alpha_int) {
+	switch (alpha_int) {
 
 	case 0:
 		return 24;
@@ -65,10 +78,14 @@ int WideB_map(int alphaint) {
 	}
 }
 #pragma endregion Mapping for a Wide B Reflector
-
-#pragma region I_map
-int I_map(int alphaint) {
-	switch (alphaint) {
+/* Determines mapping scheme for I-type rotors
+		-Standard rotors do not create two-way mappings between characters 
+		-EX...
+			If 5 maps to 23, then 23 will not map to 5 
+		-There are, however, circumstances where a value will map to itself */
+#pragma region IMap
+int IMap(int alpha_int) {
+	switch (alpha_int) {
 
 	case 0:
 		return 4;
@@ -127,10 +144,10 @@ int I_map(int alphaint) {
 	}
 }
 #pragma endregion Mapping for a I rotor
-
-#pragma region II_map
-int II_map(int alphaint) {
-	switch (alphaint) {
+/* Determines mapping scheme for II-type rotors */
+#pragma region IIMap
+int IIMap(int alpha_int) {
+	switch (alpha_int) {
 
 	case 0:
 		return 0;
@@ -189,10 +206,10 @@ int II_map(int alphaint) {
 	}
 }
 #pragma endregion Mapping for a II rotor
-
-#pragma region III_map
-int III_map(int alphaint) {
-	switch (alphaint) {
+/* Determines mapping scheme for III-type rotors */
+#pragma region IIIMap
+int IIIMap(int alpha_int) {
+	switch (alpha_int) {
 
 	case 0:
 		return 1;

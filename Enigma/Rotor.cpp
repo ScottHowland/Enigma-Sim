@@ -1,56 +1,34 @@
+/* Constructs the rotor's node map based on the identifier assigned to it 
+		-NOTE: If an invalid model identifier is passed, the function will crash. It is not possible for an Enigmachine to function
+			   should a standard rotor be used in place of the input rotor or the reflector */
+
 #include "Rotor.h"
 #include "Rotormaps.h"
 
-void Rotor::set_offset(int setting) {
-	if (setting < 0 || setting > mapsize)
-		throw std::invalid_argument("Invalid rotor setting.\n");
-	else
-		positionoffset = setting;
-}
-
-void Rotor::step() {
-	positionoffset = (++positionoffset) % mapsize;
-}
-
-string Rotor::get_model() {
-	return rotormodel;
-}
-
-int Rotor::get_offset() {
-	return positionoffset;
-}
-
-int* Rotor::get_nodemap() {
-	return nodemap;
-}
-
-int Rotor::get_mapsize() {
-	return mapsize;
-}
-
-void Rotor::build_nodemap(string rotormodel) {
-	if (rotormodel == "Input") {
-		for (int k = 0; k < mapsize; ++k)
-			nodemap[k] = k;
+/* See top-of-file comment for description */
+void Rotor::BuildNodemapOrDie(const string rotor_model) {
+	if (rotor_model == "Input") {
+		for (int k = 0; k < map_size_; ++k)
+			node_map_[k] = k;
 	}
 
-	if (rotormodel == "I") {
-		for (int k = 0; k < mapsize; ++k)
-			nodemap[k] = I_map(k);
+	if (rotor_model == "I") {
+		for (int k = 0; k < map_size_; ++k)
+			node_map_[k] = IMap(k);
 	}
 
-	if (rotormodel == "II") {
-		for (int k = 0; k < mapsize; ++k)
-			nodemap[k] = II_map(k);
+	if (rotor_model == "II") {
+		for (int k = 0; k < map_size_; ++k)
+			node_map_[k] = IIMap(k);
 	}
 
-	if (rotormodel == "III") {
-		for (int k = 0; k < mapsize; ++k)
-			nodemap[k] = III_map(k);
+	if (rotor_model_ == "III") {
+		for (int k = 0; k < map_size_; ++k)
+			node_map_[k] = IIIMap(k);
 	}
 
-	if (rotormodel == "Wide_B") {
-		for (int k = 0; k < mapsize; ++k)
-			nodemap[k] = WideB_map(k);
+	if (rotor_model == "Wide_B") {
+		for (int k = 0; k < map_size_; ++k)
+			node_map_[k] = WideBMap(k);
 	}
 }

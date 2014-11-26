@@ -1,52 +1,86 @@
-#ifndef _ROTOR_H
-#define _ROTOR_H
-#include <iostream>
+/* Rotors are responsible for...
+		-Constructing an array to facilitate the ciphering process based on a supplied model type 
+		-Knowing the size of its mapping scheme, expandable to acommodate more cipherable characters at a later date 
+		-Keep track of, and increment, its current position setting, as an offset from the 0/'A' position, to give the ciphering process
+		 more complexity and security */
+
+#ifndef ENIGMA_ENIGMA_ROTOR_H_
+#define ENIGMA_ENIGMA_ROTOR_H_
+
 #include <array>
+#include <fstream>
+#include <iostream>
 #include <iterator>
 #include <string>
-#include <fstream>
 
+using std::array;
 using std::cout;
 using std::endl;
-using std::array;
+using std::ifstream;
 using std::iterator;
 using std::string;
-using std::ifstream;
 
+/* Consists of an array to facilitate ciphering, a model type to determine the specific mappings, the map size, and the current position setting 
+   See top-of-file comment for full description */
 class Rotor {
 private:
-	const string rotormodel;
-	const int mapsize;
-	int* nodemap;
-	int positionoffset;
+	/* The identifier used to determine what mapping scheme the rotor will use for ciphering */
+	const string rotor_model_;
+	/* Determines the size of the node map of the rotor
+			-NOTE: Should be equal to 26 unless maps are extended to include capitals/lowercase, numeric characters, punctuation, etc */
+	const int map_size_;
+	/* Array used to establish the rotor's mapping scheme
+			-The indices and contained values are represented by integers 0-25, where 0 = A and 25 = Z
+			-Indices and their contained values serve as the ciphering mechanism 
+			-EX...
+				If a rotor maps the letter 'A' to the letter 'X', then the 0th index will contain the value 23
+			-Implemented as a circular array to correct for out-of-range values due to the impact of varying rotor offsets */
+	int* node_map_;
+	/* Represents the rotor's current setting as an offset from 0 or 'A'
+			-Should only ever be incremented
+			-Mod is used to ensure that the offset is always within the rotor's 26 possible settings */
+	int offset_;
 
 public:
-	/* Intializes and builds the rotor's substitution array as well as the rotor's position in the encrypting process */
-	Rotor(string rotormodel, int offset, int mapsize) : rotormodel(rotormodel), mapsize(mapsize), positionoffset(offset), nodemap(new int[mapsize]) {
-		build_nodemap(rotormodel);
-		set_offset(positionoffset);
+	/* Intializes and builds the rotor's substitution array as well as determining the rotor's initial offset */
+	Rotor(string rotor_model, int offset, int map_size) : rotor_model_(rotor_model), map_size_(map_size), offset_(offset), node_map_(new int[map_size]) {
+		BuildNodemapOrDie(rotor_model_);
+		SetOffset(offset);
 	}
 
-	/* Sets the rotor's position setting relative to 'A', or 0 */
-	void set_offset(int setting);
+	/* Sets the rotor's initial position setting relative to 'A', or 0 */
+	void SetOffset(const int setting) {
+		offset_ = setting;
+	}
 
-	/* Gives acces to the rotor's current position setting */
-	int get_offset();
+	/* Gives access to the rotor's current position setting */
+	int Offset() {
+		return offset_;
+	}
 
 	/* Provides access to the rotor's model type */
-	string get_model();
+	string RotorModel() {
+		return rotor_model_;
+	}
 
-	/* Increments the rotor's positional offset */
-	void step();
+	/* Increments the rotor's positional offset
+			-Mod is used to ensure the setting is always within the range of the rotor's mapping scheme */
+	void StepPosition() {
+		offset_ = (++offset_) % map_size_;
+	}
 
 	/* Allows access to the rotor's substitution array */
-	int* get_nodemap();
+	int* Nodemap() {
+		return node_map_;
+	}
 
 	/* Returns the size of the rotor's substitution array */
-	int get_mapsize();
+	int Mapsize() {
+		return map_size_;
+	}
 
 	/* Constructs the rotor's substitution array based on the rotor's model */
-	void build_nodemap(string rotormodel);
+	void BuildNodemapOrDie(string rotor_model);
 };
 #endif
 

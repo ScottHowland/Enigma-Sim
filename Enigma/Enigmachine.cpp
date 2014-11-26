@@ -1,157 +1,206 @@
-#include "EnigmaMachine.h"
+/* Implementations for the Enigmachine class methods
+		-Handling Enigmachine construction
+		-Managing rotor offset incrementations
+		-Executing string-int conversions, and vice versa
+		-Handling the ciphering process */
+
+#include "Enigmachine.h"
 #include "IntCharConversions.h"
 
-Enigmachine::Enigmachine(string rightrotortype, string midrotortype, string leftrotortype, string reflectortype, int rightoffset, int midoffset, int leftoffset, int rotormapsize) {
-	this->rotormapsize = rotormapsize;
-	rightrotor = new Rotor(rightrotortype, rightoffset, rotormapsize);
-	midrotor = new Rotor(midrotortype, midoffset, rotormapsize);
-	leftrotor = new Rotor(leftrotortype, leftoffset, rotormapsize);
-	rotorsequence.push_back(new Rotor("Input", 0, rotormapsize));
-	rotorsequence.push_back(rightrotor);
-	rotorsequence.push_back(midrotor);
-	rotorsequence.push_back(leftrotor);
-	rotorsequence.push_back(new Rotor(reflectortype, 0, rotormapsize));
+/* Constructs the rotors to be used for ciphering, then organizes them into a list for later iteration */
+Enigmachine::Enigmachine(string right_rotor_type, string mid_rotor_type, string left_rotor_type, string reflector_type,
+						 int right_offset, int mid_offset, int left_offset, int rotor_map_size) {
+	rotor_map_size_ = rotor_map_size;
+
+	right_rotor_ = new Rotor(right_rotor_type, right_offset, rotor_map_size_);
+	mid_rotor_ = new Rotor(mid_rotor_type, mid_offset, rotor_map_size_);
+	left_rotor_ = new Rotor(left_rotor_type, left_offset, rotor_map_size_);
+
+	/* Input rotors need not be constructed, as they have only one map configuration: X maps to X */
+	rotor_sequence_.push_back(new Rotor("Input", 0, rotor_map_size_));
+	rotor_sequence_.push_back(right_rotor_);
+	rotor_sequence_.push_back(mid_rotor_);
+	rotor_sequence_.push_back(left_rotor_);
+	rotor_sequence_.push_back(new Rotor(reflector_type, 0, rotor_map_size_));
 }
 
-void Enigmachine::step_rotors() {
-	rightrotor->step();
-	string rightmodel = rightrotor->get_model();
-	int rightposition = rightrotor->get_offset();
+/* Steps the rightmost rotor, then determines if any subsequent rotations need to be made
+		-Called right before each input character undergoes ciphering
+		-Needed to change the rotor offsets and modify the rotor maps for stronger encryption */
+void Enigmachine::StepRotors() {
+	right_rotor_->StepPosition();
 
-	if (rightmodel == "I" && rightposition == 17) {
-		midrotor->step();
-		string midmodel = midrotor->get_model();
-		int midposition = midrotor->get_offset();
+	string right_model = right_rotor_->RotorModel();
+	int right_position = right_rotor_->Offset();
 
-		if (midmodel == "II" && midposition == 5)
-			leftrotor->step();
+	/* Each rotor model has a specific 'tipping point' which will rotate the next rotor in sequence if passed 
+			-EX...
+				A rotor of model 'I' will rotrate the next rotor if it progresses from 16 ('Q') to 17 ('R')*/
+	if (right_model == "I" && right_position == 17) {
+		mid_rotor_->StepPosition();
+		string mid_model = mid_rotor_->RotorModel();
+		int mid_position = mid_rotor_->Offset();
 
-		else if (midmodel == "III" && midposition == 22)
-			leftrotor->step();
+		if (mid_model == "II" && mid_position == 5)
+			left_rotor_->StepPosition();
+
+		else if (mid_model == "III" && mid_position == 22)
+			left_rotor_->StepPosition();
 	}
 
-	else if (rightmodel == "II" && rightposition == 5) {
-		midrotor->step();
-		string midmodel = midrotor->get_model();
-		int midposition = midrotor->get_offset();
+	else if (right_model == "II" && right_position == 5) {
+		mid_rotor_->StepPosition();
+		string mid_model = mid_rotor_->RotorModel();
+		int mid_position = mid_rotor_->Offset();
 
-		if (midmodel == "I" && midposition == 17)
-			leftrotor->step();
+		if (mid_model == "I" && mid_position == 17)
+			left_rotor_->StepPosition();
 
-		else if (midmodel == "III" && midposition == 22)
-			leftrotor->step();
+		else if (mid_model == "III" && mid_position == 22)
+			left_rotor_->StepPosition();
 	}
 
-	else if (rightmodel == "III" && rightposition == 22) {
-		midrotor->step();
-		string midmodel = midrotor->get_model();
-		int midposition = midrotor->get_offset();
+	else if (right_model == "III" && right_position == 22) {
+		mid_rotor_->StepPosition();
+		string mid_model = mid_rotor_->RotorModel();
+		int mid_position = mid_rotor_->Offset();
 
-		if (midmodel == "I" && midposition == 17)
-			leftrotor->step();
+		if (mid_model == "I" && mid_position == 17)
+			left_rotor_->StepPosition();
 
-		else if (midmodel == "II" && midposition == 5)
-			leftrotor->step();
+		else if (mid_model == "II" && mid_position == 5)
+			left_rotor_->StepPosition();
 	}
 }
 
-void Enigmachine::convert_charint(string inputtarget) {
-	int inpttemp;
-	int ciphertemp;
-	for (int k = 0; k < inputtarget.size(); ++k) {
-		if (isalpha(inputtarget[k])) {
-			inpttemp = chartoint(inputtarget[k]);
-			step_rotors();
-			ciphertemp = cipher(inpttemp);
-			intqueue.push(ciphertemp);
+/* Converts a string into a sequence of integer values, ciphers each, and then pushes them to a queue for later int-char conversion*/
+void Enigmachine::StringToIntQ(string input_target) {
+	int temp_plain;
+	int temp_cipher;
+	/* Convert an alpha character in the string to an int, step the machine's rotors, then cipher it before pushing to the queue */
+	for (int k = 0; k < input_target.size(); ++k) {
+		if (isalpha(input_target[k])) {
+			temp_plain = CharToInt(input_target[k]);
+			StepRotors();
+			temp_cipher = Cipher(temp_plain);
+			int_queue_.push(temp_cipher);
 		}
+		/* If not alpha, then push the character to the queue as-is*/
 		else {
-			inpttemp = chartoint(inputtarget[k]);
-			intqueue.push(inpttemp);
+			temp_plain = CharToInt(input_target[k]);
+			int_queue_.push(temp_plain);
 		}
 	}
 }
 
-string Enigmachine::convert_intchar(queue<int> outputtarget) {
-	string cipheredstring;
-	char temp;
-	while (!outputtarget.empty()) {
-		temp = inttochar(outputtarget.front());
-		cipheredstring.push_back(temp);
-		outputtarget.pop();
+/* Converts the elements of an integer queue into a string */
+string Enigmachine::IntQToString(queue<int> output_target) {
+	string ciphered_string;
+	char temp_char;
+
+	while (!output_target.empty()) {
+		temp_char = IntToChar(output_target.front());
+		ciphered_string.push_back(temp_char);
+		output_target.pop();
 	}
-	return cipheredstring;
+	return ciphered_string;
 }
 
-bool Enigmachine::queue_empty() {
-	return (intqueue.empty());
-}
+/* Manages the ciphering process from the input rotor up until the process reaches the reflector */
+int Enigmachine::CipherToReflector(list<Rotor*>::iterator entry_point, int temp_cipher) {
+	int current_offset;
+	int next_offset;
 
-int Enigmachine::queue_front() {
-	return intqueue.front();
-}
+	entry_point = rotor_sequence_.begin();
 
-queue<int> Enigmachine::get_queue() {
-	return intqueue;
-}
-
-int Enigmachine::cipher(int ciphertarget) {
-	int tempcipher = ciphertarget;
-	int targetindex;
-	int nextoffset;
-	int prevoffset;
-	int currentoffset;
-	list<Rotor*>::iterator entrypoint = rotorsequence.begin();
-	
 	while (true) {
-		currentoffset = (*entrypoint)->get_offset();
+		current_offset = (*entry_point)->Offset();
 
-		if (next(entrypoint,1) != rotorsequence.end())
-			nextoffset = (*next(entrypoint, 1))->get_offset();
+		if (next(entry_point, 1) != rotor_sequence_.end())
+			next_offset = (*next(entry_point, 1))->Offset();
+		/* If the next element in the list is one past the end, then the iterator must be pointing to the reflector, which always has an offset of 0 */
 		else
-			nextoffset = 0;
+			next_offset = 0;
 
-		tempcipher = (*entrypoint)->get_nodemap()[tempcipher] + nextoffset - currentoffset;
+		/* The temporary cipher value is equal to whatever the old temp value maps to in the current rotor's node map 
+		   adjusted by the offsets of the current and following rotor to simulate the effects of position offsets in a physical Enigma */
+		temp_cipher = (*entry_point)->Nodemap()[temp_cipher] + next_offset - current_offset;
 
-		if (tempcipher >= 0)
-			tempcipher = tempcipher % rotormapsize;
+		/* These operations will guarantee that the temporary cipher value is within the range of the rotor maps,
+		   so as to prevent out-of-range indices being searched for in the next rotor map */
+		if (temp_cipher >= 0)
+			temp_cipher = temp_cipher % rotor_map_size_;
 		else
-			tempcipher = tempcipher + rotormapsize;
+			temp_cipher = temp_cipher + rotor_map_size_;
 
-		if (next(entrypoint,1) != rotorsequence.end())
-			++entrypoint;
+		if (next(entry_point, 1) != rotor_sequence_.end())
+			++entry_point;
 		else
 			break;
 	}
 
-	nextoffset = (*prev(entrypoint, 1))->get_offset();
-	tempcipher = tempcipher + nextoffset;
-	tempcipher = tempcipher % rotormapsize;
+	return temp_cipher;
+}
+
+/* Manages the ciphering process when the process has reached the reflector, before the cipher value is fed back through the sequence in reverse */
+int Enigmachine::CipherAtReflector(list<Rotor*>::iterator entry_point, int temp_cipher) {
+	int next_offset;
+
+	entry_point = prev(rotor_sequence_.end(), 1);
+	next_offset = (*prev(entry_point, 1))->Offset();
+	/* There is no risk of the temp cipher value being negative, and the current offset is always 0 at the reflector */
+	temp_cipher = temp_cipher + next_offset;
+	temp_cipher = temp_cipher % rotor_map_size_;
+
+	return temp_cipher;
+}
+
+/* Manages the ciphering process as the temporary cipher value is fed through the rotors in reverse order */
+int Enigmachine::CipherFromReflector(list<Rotor*>::iterator entry_point, int temp_cipher) {
+	int current_offset;
+	int next_offset;
+
+	entry_point = prev(rotor_sequence_.end(), 1);
 
 	while (true) {
-			if (entrypoint != rotorsequence.begin())
-				--entrypoint;
-	
-		currentoffset = (*entrypoint)->get_offset();
+		if (entry_point != rotor_sequence_.begin())
+			--entry_point;
 
-		if (entrypoint != rotorsequence.begin())
-			nextoffset = (*prev(entrypoint,1))->get_offset();
+		current_offset = (*entry_point)->Offset();
+
+		/* Similar to the reflector, the input rotor will always have an offset of 0 */
+		if (entry_point != rotor_sequence_.begin())
+			next_offset = (*prev(entry_point, 1))->Offset();
 		else
-			nextoffset = 0;
+			next_offset = 0;
 
-			for (int k = 0; k < (*entrypoint)->get_mapsize(); ++k) {
-				int mappedvalue = (*entrypoint)->get_nodemap()[k];
-				if (tempcipher == mappedvalue) {
-					tempcipher = k + nextoffset - currentoffset;
-					if (tempcipher >= 0)
-						tempcipher = tempcipher % rotormapsize;
-					else
-						tempcipher = tempcipher + rotormapsize;
-					break;
+		/* Instead of seeing what value an index maps to, the index that maps to the cipher value, modified by offsets, is what is searched for */
+		for (int k = 0; k < (*entry_point)->Mapsize(); ++k) {
+			int mappedvalue = (*entry_point)->Nodemap()[k];
+			if (temp_cipher == mappedvalue) {
+				temp_cipher = k + next_offset - current_offset;
+
+				if (temp_cipher >= 0)
+					temp_cipher = temp_cipher % rotor_map_size_;
+				else
+					temp_cipher = temp_cipher + rotor_map_size_;
+				break;
 			}
 		}
-			if (entrypoint == rotorsequence.begin())
+		if (entry_point == rotor_sequence_.begin())
 			break;
 	}
-	return tempcipher;
+		return temp_cipher;
+}
+
+/* Bundles the "CipherXReflector" functions to execute the ciphering process while keeping the individual stages distinct and modular */
+int Enigmachine::Cipher(int to_cipher) {
+	int temp_cipher = to_cipher;
+	list<Rotor*>::iterator entry_point;
+	
+	temp_cipher = CipherToReflector(entry_point, temp_cipher);
+	temp_cipher = CipherAtReflector(entry_point, temp_cipher);
+	temp_cipher = CipherFromReflector(entry_point, temp_cipher);
+
+	return temp_cipher;
 }

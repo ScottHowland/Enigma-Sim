@@ -76,8 +76,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="EnigmaMachine.h" />
-    <ClInclude Include="AppFlow.h" />
+    <ClInclude Include="Enigmachine.h" />
+    <ClInclude Include="Execute.h" />
     <ClInclude Include="IntCharConversions.h" />
     <ClInclude Include="Rotor.h" />
     <ClInclude Include="Rotormaps.h" />

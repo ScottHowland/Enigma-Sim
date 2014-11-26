@@ -1,24 +1,34 @@
-#ifndef _UTILITIES_H
-#define _UTILITIES_H
+/* The various operations that are not involved in the actual ciphering process
+		-UI handling
+		-Acquiring user-defined data for constructing the rotors and Enigmachine
+		-Preparing input for ciphering
+		-Calling and organizing the functions that make up the ciphering process */
+
+#ifndef ENIGMA_ENIGMA_UTILITIES_H
+#define ENIGMA_ENIGMA_UTILITIES_H
+
+#include "Enigmachine.h"
+
 #include <iostream>
-#include <string>
 #include <locale>
 #include <queue>
 #include <sstream>
+#include <string>
 
-using std::string;
-using std::queue;
-using std::cout;
 using std::cin;
+using std::cout;
 using std::endl;
 using std::getline;
-using std::toupper;
 using std::isalpha;
 using std::isspace;
+using std::queue;
+using std::string;
 using std::stringstream;
+using std::toupper;
 
 /* Centers string in the console window */
-void center_string(string text) {
+void CenterString(string text) {
+	/* Determines how many spaces are needed to center the string, given its size */
 	int num_spaces = (80 - text.size()) / 2;
 	for (int k = 0; k < num_spaces; ++k)
 		cout << " ";
@@ -26,82 +36,85 @@ void center_string(string text) {
 }
 
 /* Prints one console line's worth of dashes */
-void dash_line(){
+void DashLine(){
 	for (int k = 0; k < 80; ++k)
 		cout << "-";
 	cout << endl;
 }
 
 /* Capitalizes all elements of a given string */
-string capitalize_string(string text) {
-	string captext;
+string CapitalizeString(string text) {
+	string capital_text;
 	for (int k = 0; k < text.size(); ++k)
-		captext.push_back(toupper(text[k]));
-	return captext;
+		capital_text.push_back(toupper(text[k]));
+	return capital_text;
 }
 
 /* Prompts user to input a string comprised of non-numeric characters and capitalizes it */
-string input_string() {
-	string plaintext;
-	string captext;
-	bool b_validmessage = true;
+string InputString() {
+	string plain_text;
+	string capital_text;
+	bool bvalid_message = true;
 
 	do {
-		if (!b_validmessage) {
-			cout << "I'm sorry, but that message contained a non-alphabetic, non-space character.\n\n";
-			plaintext = "";
+		if (!bvalid_message) {
+			cout << "\nI'm sorry, but that message contained a non-alphabetic, non-space character.\n\n";
+			plain_text = "";
 		}
 
 		cout << "Please enter the message to be ciphered.\n"
 			<< "\t-Not case-sensitive.\n"
 			<< "\t-Letters and spaces only, please.\n\n";
 
-		getline(std::cin, plaintext);
-
-		for (int k = 0; k < plaintext.size(); ++k) {
-			bool b_isalpha = isalpha(plaintext[k]);
-			bool b_isspace = isspace(plaintext[k]);
+		getline(std::cin, plain_text);
+		/* Will reject a message with a non-alpha, non-space character (',', '5', '@') */
+		for (int k = 0; k < plain_text.size(); ++k) {
+			bool b_isalpha = isalpha(plain_text[k]);
+			bool b_isspace = isspace(plain_text[k]);
 			if (!b_isalpha && !b_isspace)
-				b_validmessage = false;
+				bvalid_message = false;
 			else
-				b_validmessage = true;
+				bvalid_message = true;
 		}
-	} while (!b_validmessage);
+	} while (!bvalid_message);
 
-	captext = capitalize_string(plaintext);
+	capital_text = CapitalizeString(plain_text);
 
-	dash_line();
+	DashLine();  /* To ensure UI clarity */
 
-	return captext;
+	return capital_text;
 }
 
 /* Preps user input for encryption/decryption */
-string initialize_input(queue<char> &messagequeue) {
-	string preppedstring;
-	preppedstring = input_string();
-	return preppedstring;
+string InitializeInput() {
+	string prepped_string;
+	prepped_string = InputString();
+	return prepped_string;
 }
 
 
 /* Ciphers a string and returns its ciphertext */
-string cipher_string(Enigmachine enigmachine, string plaintext) {
-	string ciphertext;
-	enigmachine.convert_charint(plaintext);
-	queue<int> outputqueue = enigmachine.get_queue();
-	ciphertext = enigmachine.convert_intchar(outputqueue);
-	return ciphertext;
+string CipherString(Enigmachine enigmachine, string plain_text) {
+	string cipher_text;
+	/* Responsible for the char-int conversion and ciphering */
+	enigmachine.StringToIntQ(plain_text);
+	queue<int> output_queue = enigmachine.IntQueue();
+	cipher_text = enigmachine.IntQToString(output_queue);
+	return cipher_text;
 }
 
-/* Determines one of the enigma's rotor models */
-string set_rotor_model(int slottarget) {
-	string returnstring;
-	int returnmodel;
-	if (slottarget != 3) {
+/* Prompts user to provide input, collects it, and then uses that data to determine what rotor type should be returned */
+string SetRotorModel(int slot_target) {
+	string return_string;
+	int return_model;
+
+	/* The user cannot currently determine the reflector type */
+	if (slot_target != 3) {
 		cout << "Select which rotor you would like to place in ";
 
-		if (slottarget == 0)
+		if (slot_target == 0)
 			cout << "the right slot (1-3)\n";
-		else if (slottarget == 1)
+		else if (slot_target == 1)
 			cout << "the middle slot (1-3)\n";
 		else
 			cout << "the left slot (1-3)\n";
@@ -111,21 +124,21 @@ string set_rotor_model(int slottarget) {
 		cout << "2. Model II\n";
 		cout << "3. Model III\n\n";
 
+		/* Ensures that the user selection is valid */
 		while (true) {
-			getline(cin, returnstring);
-			stringstream modelstream(returnstring);
-			if (modelstream >> returnmodel && returnmodel) {
-				if (returnmodel >= 1 && returnmodel <= 3)
+			getline(cin, return_string);
+			stringstream model_stream(return_string);
+			if (model_stream >> return_model && return_model >= 1 && return_model <= 3) {
 					break;
 			}
 			cout << "Invalid rotor selection. Please select a choice 1-3\n";
 		}
 
-		dash_line();
+		DashLine();  /* To ensure UI clarity */
 
-		if (returnmodel == 1)
+		if (return_model == 1)
 			return "I";
-		else if (returnmodel == 2)
+		else if (return_model == 2)
 			return "II";
 		else
 			return  "III";
@@ -134,65 +147,71 @@ string set_rotor_model(int slottarget) {
 		return "Wide_B";
 }
 
-int set_rotor_offset(int slottarget) {
-	string returnstring;
-	int returnoffset;
+/* Prompts user for input, collects it, and then determines what value should be returned for initializing a rotor offset */
+int SetRotorOffset(int slot_target) {
+	string return_string;
+	int return_offset;
 		cout <<"Please enter the initial rotor offset for the ";
 
-		if (slottarget == 0)
+		/* Make sure the user knows what offset is being determined */
+		if (slot_target == 0)
 			cout << "right rotor (0-25)\n\n";
-		else if (slottarget == 1)
+		else if (slot_target == 1)
 			cout << "mid rotor (0-25)\n\n";
 		else
 			cout << "left rotor (0-25)\n\n";
 
+		/* Ensures user input is valid */
 		while (true) {
-			getline(cin, returnstring);
-			stringstream modelstream(returnstring);
-			if (modelstream >> returnoffset) {
-				if (returnoffset >= 0 && returnoffset <= 25)
+			getline(cin, return_string);
+			stringstream model_stream(return_string);
+			if (model_stream >> return_offset && return_offset >= 0 && return_offset <= 25) {
 					break;
 			}
 			cout << "Invalid rotor selection. Please select a choice 0-25\n";
 		}
 
-		dash_line();
-		return returnoffset;
+		DashLine();  /* To ensure UI clarity */
+
+		return return_offset;
 }
 
 /* Displays the application's title */
-void title() {
-	dash_line();
-	center_string("Enigma Simulator\n");
-	center_string("Developed by Scott Howland\n");
-	dash_line();
+void Title() {
+	DashLine();
+	CenterString("Enigma Simulator\n");
+	CenterString("Created by Scott Howland\n");
+	CenterString("Designed and Developed from 11/17/14 to 11/25/14\n");
+	DashLine();
 }
 
 /* Displays the application's construction menu */
-Enigmachine menu(int mapsize) {
-	string rightmodel, midmodel, leftmodel, reflectormodel;
-	int rightoffset, midoffset, leftoffset;
+Enigmachine Menu(const int map_size) {
+	string right_model, mid_model, left_model, reflector_model;
+	int right_offset, mid_offset, left_offset;
 
+	/* Determine what model types will be used for the machine's rotors */
 	for (int k = 0; k < 4; ++k) {
 		if (k == 0)
-			rightmodel = set_rotor_model(k);
+			right_model = SetRotorModel(k);
 		else if (k == 1)
-			midmodel = set_rotor_model(k);
+			mid_model = SetRotorModel(k);
 		else if (k == 2)
-			leftmodel = set_rotor_model(k);
+			left_model = SetRotorModel(k);
 		else
-			reflectormodel = set_rotor_model(k);
+			reflector_model = SetRotorModel(k);
 	}
 
+	/* Determine the offsets of those rotors */
 	for (int k = 0; k < 3; ++k) {
 		if (k == 0)
-			rightoffset = set_rotor_offset(k);
+			right_offset = SetRotorOffset(k);
 		else if (k == 1)
-			midoffset = set_rotor_offset(k);
+			mid_offset = SetRotorOffset(k);
 		else
-			leftoffset = set_rotor_offset(k);
+			left_offset = SetRotorOffset(k);
 	}
 
-	return Enigmachine(rightmodel, midmodel, leftmodel, reflectormodel, rightoffset, midoffset, leftoffset, mapsize);
+	return Enigmachine(right_model, mid_model, left_model, reflector_model, right_offset, mid_offset, left_offset, map_size);
 }
 #endif
