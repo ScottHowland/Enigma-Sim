@@ -2,7 +2,8 @@
 		-UI handling
 		-Acquiring user-defined data for constructing the rotors and Enigmachine
 		-Preparing input for ciphering
-		-Calling and organizing the functions that make up the ciphering process */
+		-Calling and organizing the functions that make up the ciphering process 
+		-Determining whether to cipher another message */
 
 #ifndef ENIGMA_ENIGMA_UTILITIES_H
 #define ENIGMA_ENIGMA_UTILITIES_H
@@ -214,5 +215,20 @@ Enigmachine Menu(const int map_size) {
 	}
 
 	return Enigmachine(right_model, mid_model, left_model, reflector_model, right_offset, mid_offset, left_offset, map_size);
+}
+
+/* Prompts the user, then determines whether another message will be ciphered without resetting the rotor offsets */
+bool CipherAnother(bool bloop) {
+	string loop_breaker;
+
+	cout << "Would you care to cipher another message? (Rotors settings will persist)\n\n";
+	getline(cin, loop_breaker);
+
+	DashLine();  /* To ensure UI clarity */
+
+	if (loop_breaker == "Yes" || loop_breaker == "yes" || loop_breaker == "y")
+		return true;
+	else
+		return false;
 }
 #endif
