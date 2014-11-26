@@ -218,7 +218,7 @@ Enigmachine Menu(const int map_size) {
 }
 
 /* Prompts the user, then determines whether another message will be ciphered without resetting the rotor offsets */
-bool CipherAnother(bool bloop) {
+bool CipherAnother() {
 	string loop_breaker;
 
 	cout << "Would you care to cipher another message? (Rotors settings will persist)\n\n";
